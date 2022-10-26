@@ -18,14 +18,23 @@ let $ = cheerio.load(content); // $ is the object based on the rawFile
 // // --------------------- RAW TABLE ROWS ---------------------
 let table = $('table').eq(2).find('tbody');
 let index = []
+let meetings = []
 
 table.children().each(function(i, elem) {
     if ($(elem).attr("style")=="margin-bottom:10px") {
         let tr = $(elem).html(); // table row data
         let result = rowObject(tr); // RUN FUNCTION - rowObject()
-        console.log(result);
+        // console.log(result);
+        
+        // --------------------- WRITE JSON FILE ---------------------
+        // inspiration: muonius/msdv-data-structures
+        // source: https://github.com/muonius/msdv-data-structures/blob/master/week02/week02.js
+        console.log(result.Info.address);
+        meetings.push(result.Info.address);
     }
 });
+
+fs.writeFileSync('/home/ec2-user/environment/data/addr/m09-address.json', JSON.stringify(meetings));
 
 
 // --------------------- MAIN FUNCTION ---------------------
@@ -36,11 +45,11 @@ function rowObject(data) {
     // inspiration: miaomiaorepo/dataStructure
     // source: https://github.com/miaomiaorepo/dataStructure/blob/main/parsing-aa-data/aa02.js
     const zone = {
-        index: index.length,
+        item: index.length,
         Info: {},
         Details: {},
         Times: []
-    }
+    };
 
     // --------------------- MEETING INFO ---------------------
     // splits html into raw info, raw details, raw times
@@ -150,7 +159,6 @@ function rowObject(data) {
             if (subString === 'Meeting') {
                 hourType.push({
                     listing: hourNumber + 1,
-                    // hourType: hourList[j].replace('Meeting Type</b> ', '')
                     hourCode: hourList[j].replace('Meeting Type</b> ','').substring(0, 2).trim(),
                     hourType: findKeys(codes, hourList[j].replace('Meeting Type</b> ','').substring(0, 2).trim())
                 })
